@@ -138,11 +138,11 @@ COPY public.empleado (dni_empleado, productividad_emplead, seguimiento, code_zon
 \.
 
 COPY public.pedido (cantidad, fechacompra, code_pedido, dni_empleado, dni_cliente) FROM stdin;
-1	2022-11-02	1	12345678A	11111111A
-2	2022-11-02	2	87654321B	22222222B
-3	2022-11-02	3	43215678C	33333333c
-4	2022-11-02	4	56784321D	44444444d
-5	2022-11-02	5	12341234E	33333333c
+1	2022-11-02	1	12345678A	11111111F
+2	2022-11-02	2	87654321B	22222222G
+3	2022-11-02	3	43215678C	33333333H
+4	2022-11-02	4	56784321D	44444444L
+5	2022-11-02	5	12341234E	33333333K
 \.
 
 COPY public.producto (code_pedido, disponibilidad, code_zona) FROM stdin;
