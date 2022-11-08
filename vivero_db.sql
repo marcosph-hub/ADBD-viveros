@@ -8,14 +8,13 @@ SET client_min_messages = warning;
 SET standard_conforming_strings = on;
 SET idle_in_transaction_session_timeout = 0;
 SELECT pg_catalog.set_config('search_path', '', false);
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
 SET default_tablespace = '';
 SET default_with_oids = false;
 
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
 CREATE TABLE public.cliente (
-    dnic character varying(9) NOT NULL,
+    dni_cliente character varying(9) NOT NULL,
     abonado boolean DEFAULT false NOT NULL,
     bonificacion integer DEFAULT 0,
     CONSTRAINT ck_bonificacion CHECK (
@@ -29,10 +28,10 @@ END)
 ALTER TABLE public.cliente OWNER TO postgres;
 
 CREATE TABLE public.empleado (
-    dnie character varying(9) NOT NULL,
-    productividade integer NOT NULL,
+    dni_empleado character varying(9) NOT NULL,
+    productividad_emplead integer NOT NULL,
     seguimiento character varying(255) NOT NULL,
-    codz integer NOT NULL
+    code_zona integer NOT NULL
 );
 
 
@@ -41,18 +40,18 @@ ALTER TABLE public.empleado OWNER TO postgres;
 CREATE TABLE public.pedido (
     cantidad integer NOT NULL,
     fechacompra date DEFAULT CURRENT_DATE NOT NULL,
-    codp integer NOT NULL,
-    dnie character varying(9) NOT NULL,
-    dnic character varying(9) NOT NULL
+    code_pedido integer NOT NULL,
+    dni_empleado character varying(9) NOT NULL,
+    dni_cliente character varying(9) NOT NULL
 );
 
 
 ALTER TABLE public.pedido OWNER TO postgres;
 
 CREATE TABLE public.producto (
-    codp integer NOT NULL,
+    code_pedido integer NOT NULL,
     disponibilidad integer NOT NULL,
-    codz integer NOT NULL
+    code_zona integer NOT NULL
 );
 
 
@@ -70,7 +69,7 @@ CREATE SEQUENCE public.producto_codp_seq
 
 ALTER TABLE public.producto_codp_seq OWNER TO postgres;
 
-ALTER SEQUENCE public.producto_codp_seq OWNED BY public.producto.codp;
+ALTER SEQUENCE public.producto_codp_seq OWNED BY public.producto.code_pedido;
 
 CREATE TABLE public.vivero (
     codv integer NOT NULL,
@@ -94,7 +93,7 @@ ALTER TABLE public.vivero_codv_seq OWNER TO postgres;
 ALTER SEQUENCE public.vivero_codv_seq OWNED BY public.vivero.codv;
 
 CREATE TABLE public.zona (
-    codz integer NOT NULL,
+    code_zona integer NOT NULL,
     tipoz character varying(255) NOT NULL,
     productividadz integer,
     codv integer NOT NULL
@@ -114,15 +113,15 @@ CREATE SEQUENCE public.zona_codz_seq
 
 ALTER TABLE public.zona_codz_seq OWNER TO postgres;
 
-ALTER SEQUENCE public.zona_codz_seq OWNED BY public.zona.codz;
+ALTER SEQUENCE public.zona_codz_seq OWNED BY public.zona.code_zona;
 
-ALTER TABLE ONLY public.producto ALTER COLUMN codp SET DEFAULT nextval('public.producto_codp_seq'::regclass);
+ALTER TABLE ONLY public.producto ALTER COLUMN code_pedido SET DEFAULT nextval('public.producto_codp_seq'::regclass);
 
 ALTER TABLE ONLY public.vivero ALTER COLUMN codv SET DEFAULT nextval('public.vivero_codv_seq'::regclass);
 
-ALTER TABLE ONLY public.zona ALTER COLUMN codz SET DEFAULT nextval('public.zona_codz_seq'::regclass);
+ALTER TABLE ONLY public.zona ALTER COLUMN code_zona SET DEFAULT nextval('public.zona_codz_seq'::regclass);
 
-COPY public.cliente (dnic, abonado, bonificacion) FROM stdin;
+COPY public.cliente (dni_cliente, abonado, bonificacion) FROM stdin;
 43835202P	t	20
 22222222B	t	25
 11111111A	f	0
@@ -130,7 +129,7 @@ COPY public.cliente (dnic, abonado, bonificacion) FROM stdin;
 33333333c	f	0
 \.
 
-COPY public.empleado (dnie, productividade, seguimiento, codz) FROM stdin;
+COPY public.empleado (dni_empleado, productividad_emplead, seguimiento, code_zona) FROM stdin;
 12345678A	10	Bueno	1
 87654321B	5	Excelente	2
 43215678C	25	Malo	3
@@ -138,7 +137,7 @@ COPY public.empleado (dnie, productividade, seguimiento, codz) FROM stdin;
 12341234E	16	Bueno	5
 \.
 
-COPY public.pedido (cantidad, fechacompra, codp, dnie, dnic) FROM stdin;
+COPY public.pedido (cantidad, fechacompra, code_pedido, dni_empleado, dni_cliente) FROM stdin;
 1	2022-11-02	1	12345678A	11111111A
 2	2022-11-02	2	87654321B	22222222B
 3	2022-11-02	3	43215678C	33333333c
@@ -146,7 +145,7 @@ COPY public.pedido (cantidad, fechacompra, codp, dnie, dnic) FROM stdin;
 5	2022-11-02	5	12341234E	33333333c
 \.
 
-COPY public.producto (codp, disponibilidad, codz) FROM stdin;
+COPY public.producto (code_pedido, disponibilidad, code_zona) FROM stdin;
 1	10	1
 2	9	2
 3	8	3
@@ -155,14 +154,14 @@ COPY public.producto (codp, disponibilidad, codz) FROM stdin;
 \.
 
 COPY public.vivero (codv, nombrev) FROM stdin;
-1	Vivero1
-2	ViveroMarcos
-3	ViveroHector
-4	ViveroRamon
-5	ViveroJoseCarlos
+1	Vivero_Tester_1
+2	Vivero_Tester_2
+3	Vivero_Tester_3
+4	Vivero_Tester_4
+5	Vivero_Tester_5
 \.
 
-COPY public.zona (codz, tipoz, productividadz, codv) FROM stdin;
+COPY public.zona (code_zona, tipoz, productividadz, codv) FROM stdin;
 1	Exterior	10	1
 2	Interior	5	2
 3	Cajas	7	3
@@ -177,16 +176,16 @@ SELECT pg_catalog.setval('public.vivero_codv_seq', 5, true);
 SELECT pg_catalog.setval('public.zona_codz_seq', 5, true);
 
 ALTER TABLE ONLY public.cliente
-    ADD CONSTRAINT cliente_pkey PRIMARY KEY (dnic);
+    ADD CONSTRAINT cliente_pkey PRIMARY KEY (dni_cliente);
 
 ALTER TABLE ONLY public.empleado
-    ADD CONSTRAINT empleado_pkey PRIMARY KEY (dnie);
+    ADD CONSTRAINT empleado_pkey PRIMARY KEY (dni_empleado);
 
 ALTER TABLE ONLY public.pedido
-    ADD CONSTRAINT pedido_pkey PRIMARY KEY (codp, dnie, dnic);
+    ADD CONSTRAINT pedido_pkey PRIMARY KEY (code_pedido, dni_empleado, dni_cliente);
 
 ALTER TABLE ONLY public.producto
-    ADD CONSTRAINT producto_pkey PRIMARY KEY (codp);
+    ADD CONSTRAINT producto_pkey PRIMARY KEY (code_pedido);
 
 ALTER TABLE ONLY public.vivero
     ADD CONSTRAINT vivero_nombrev_key UNIQUE (nombrev);
@@ -195,22 +194,22 @@ ALTER TABLE ONLY public.vivero
     ADD CONSTRAINT vivero_pkey PRIMARY KEY (codv);
 
 ALTER TABLE ONLY public.zona
-    ADD CONSTRAINT zona_pkey PRIMARY KEY (codz);
+    ADD CONSTRAINT zona_pkey PRIMARY KEY (code_zona);
 
 ALTER TABLE ONLY public.empleado
-    ADD CONSTRAINT empleado_codz_fkey FOREIGN KEY (codz) REFERENCES public.zona(codz);
+    ADD CONSTRAINT empleado_codz_fkey FOREIGN KEY (code_zona) REFERENCES public.zona(code_zona);
 
 ALTER TABLE ONLY public.pedido
-    ADD CONSTRAINT pedido_codp_fkey FOREIGN KEY (codp) REFERENCES public.producto(codp);
+    ADD CONSTRAINT pedido_codp_fkey FOREIGN KEY (code_pedido) REFERENCES public.producto(code_pedido);
 
 ALTER TABLE ONLY public.pedido
-    ADD CONSTRAINT pedido_dnic_fkey FOREIGN KEY (dnic) REFERENCES public.cliente(dnic);
+    ADD CONSTRAINT pedido_dni_cliente_fkey FOREIGN KEY (dni_cliente) REFERENCES public.cliente(dni_cliente);
 
 ALTER TABLE ONLY public.pedido
-    ADD CONSTRAINT pedido_dnie_fkey FOREIGN KEY (dnie) REFERENCES public.empleado(dnie);
+    ADD CONSTRAINT pedido_dni_empleado_fkey FOREIGN KEY (dni_empleado) REFERENCES public.empleado(dni_empleado);
 
 ALTER TABLE ONLY public.producto
-    ADD CONSTRAINT producto_codz_fkey FOREIGN KEY (codz) REFERENCES public.zona(codz);
+    ADD CONSTRAINT producto_codz_fkey FOREIGN KEY (code_zona) REFERENCES public.zona(code_zona);
 
 ALTER TABLE ONLY public.zona
     ADD CONSTRAINT zona_codv_fkey FOREIGN KEY (codv) REFERENCES public.vivero(codv);
